@@ -57,7 +57,7 @@ Based on the feedback received from the Customer's team regarding the list of fi
 ##### Description
 The `_mintDai()` function defined at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L274 is for minting WaifuTokens to address `recipient`. But the logic in the function transfers `DAI` from `recipient` and mints to `msg.sender`. If the contract has approval to transfer `DAI` from `recipient`, the attacker can front run and mint WaifuTokens to themselves.
 
-The `_burnDai()` function defined at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L281. The function burns WaifuTokens from `recipient` and transfers `DAI` to `msg.sender`, instead of the other way around. An attacker can burn WaifuTokens of any user and get `DAI`.
+The `_burnDai()` function defined at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L281 The function burns WaifuTokens from `recipient` and transfers `DAI` to `msg.sender`, instead of the other way around. An attacker can burn WaifuTokens of any user and get `DAI`.
 
 ##### Recommendation
 We recommend to swap `msg.sender` and `recipient` in these functions to fix the logic.
@@ -67,9 +67,9 @@ We recommend to swap `msg.sender` and `recipient` in these functions to fix the 
 
 #### 2. Integer underflow leading to loss of funds
 ##### Description
-- In the function `_burn()`, collateral value can underflow at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L310. An attacker can call `burn()` without burning any WaifuTokens and `amount` equal to contract's balance to withdraw all the funds of the contract in the asset. The `require` on line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L313 will pass since `collateral[msg.sender][asset]` will underflow.
+- In the function `_burn()`, collateral value can underflow at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L310 An attacker can call `burn()` without burning any WaifuTokens and `amount` equal to contract's balance to withdraw all the funds of the contract in the asset. The `require` on line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L313 will pass since `collateral[msg.sender][asset]` will underflow.
 
-- In the function `getSoftRepayment()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L58, if `_debt` is smaller than `value`, there will be underflow and the function returns `_debt`. An attacker can liquidate any position even if it's safe and earn profit.
+- In the function `getSoftRepayment()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L58 if `_debt` is smaller than `value`, there will be underflow and the function returns `_debt`. An attacker can liquidate any position even if it's safe and earn profit.
 
 ##### Recommendation
 We recommend to use a `SafeMath` library.
@@ -92,7 +92,7 @@ The attack vector:
 Also it can mislead users about asset prices if they use `lookup()` functions.
 
 ##### Recommendation
-We suggest to fix the implementation of the price oracle and `lookup` functions that use it. For example, Uniswap V3 Oracle library function `getQuoteAtTick()`: https://github.com/Uniswap/v3-periphery/blob/22a7ead071fff53f00d9ddc13434f285f4ed5c7d/contracts/libraries/OracleLibrary.sol#L49. 
+We suggest to fix the implementation of the price oracle and `lookup` functions that use it. For example, Uniswap V3 Oracle library function `getQuoteAtTick()`: https://github.com/Uniswap/v3-periphery/blob/22a7ead071fff53f00d9ddc13434f285f4ed5c7d/contracts/libraries/OracleLibrary.sol#L49 
 `USDT` has 6 decimals, so it is not precise for small amounts of tokens with higher decimals. The difference in decimals also has to be considered when calculating the price.
 
 ##### Status
@@ -101,11 +101,11 @@ We suggest to fix the implementation of the price oracle and `lookup` functions 
 #### 4. Unsafe transfer of ERC20 tokens
 ##### Description
 There are no checks for return values of `transfer`/`transferFrom` at the lines 
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L275, 
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L283,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L171,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L290,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L316.
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L275
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L283
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L171
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L290
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L316
 
 The users also provide address of a token for `mint()`/`burn()`. It is unsafe since some tokens do not revert on failure, but instead return `false` (e.g. `ZRX`). An attacker can mint WaifuTokens without actually transferring collateral.
 
@@ -135,12 +135,12 @@ First scenario:
 3. `_liquidity()` function calls `_liquidityV()`.
 4. Since `_liquidityCache[token] = 0`, the function `_liquidityV()` returns `_updated = true`.
 5. Then `liquidities[token]` is overwritten with a small value `_val`.
-6. Other users who want to mint WaifuTokens will only be able to mint up to that cached value `liquidities[token]`, since `require` will fail at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L299.
+6. Other users who want to mint WaifuTokens will only be able to mint up to that cached value `liquidities[token]`, since `require` will fail at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L299
 
 Second scenario:
 1. The token is new to the contract, so `_liquidityCache[token] = 0` and `liquidities[token] = 0`.
 2. The user wants to provide collateral of asset that is significantly bigger than `_minLiquidity`.
-3. The code will enter this condition https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L210-L214.
+3. The code will enter this condition https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L210-L214
 4. The `_liq` variable will be set to `472500e18`.
 5. They will not be able to mint more than this amount.
 
@@ -152,7 +152,7 @@ We suggest to fix this logic by changing how liquidity of an asset is calculated
 
 #### 2. Incorrect minting for tokens with fees
 ##### Description
-Some tokens have fees on transfer. When using `transferFrom()`, amount received might be smaller than the argument `amount`. At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L293-L294, the collateral variables add `amount` sent which will misrepresent the actual balance of the contract. The user might mint more than they are supposed to.
+Some tokens have fees on transfer. When using `transferFrom()`, amount received might be smaller than the argument `amount`. At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L293-L294 the collateral variables add `amount` sent which will misrepresent the actual balance of the contract. The user might mint more than they are supposed to.
 
 ##### Recommendation
 We recommend to use balance difference to count amount of `asset` received.
@@ -162,7 +162,7 @@ We recommend to use balance difference to count amount of `asset` received.
 
 #### 3. Using tokens with a blocklist
 ##### Description
-At the lines: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L290, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L316. Some tokens have a blocklist (e.g. `USDC`). If they are used as collateral and WaifuToken is blocked off-chain, the users will not be able to receive their assets from the contract. 
+At the lines: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L290 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L316 Some tokens have a blocklist (e.g. `USDC`). If they are used as collateral and WaifuToken is blocked off-chain, the users will not be able to receive their assets from the contract. 
 
 ##### Recommendation
 Consider creating a whitelist of allowed tokens to be used as collateral.
@@ -174,7 +174,7 @@ Consider creating a whitelist of allowed tokens to be used as collateral.
 
 #### 1. Integer underflow for `dai`
 ##### Description
-In the function `burnDai()` an attacker can underflow the `dai` variable at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L284. Let's say the value of `dai` is 0 after contract deployment.
+In the function `burnDai()` an attacker can underflow the `dai` variable at line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L284 Let's say the value of `dai` is 0 after contract deployment.
 
 The attacker can follow these steps:
 1. mint WaifuTokens using `mint()` function using an ERC20 token
@@ -212,10 +212,10 @@ We recommend to add checks for addresses to not equal address zero.
 #### 3. Possible manipulation of contract parameters by the miner
 ##### Description
 The `block.timestamp` is used at the following lines
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L200,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L251,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L324,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L336.
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L200
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L251
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L324
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L336
 
 The value of `block.timestamp` is set by the miner. They can manipulate it to set the liquidity of a token or to liquidate unsafe positions after updating LTV of a token.
 
@@ -227,7 +227,7 @@ We recommend that you avoid using `block.timestamp`.
 
 #### 4. No require of success in search of pool
 ##### Description
-In the function `_getPool()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L30, if a pool for `token` and `refCurrency` is not found, then the function returns `pool` with address zero.
+In the function `_getPool()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L30 if a pool for `token` and `refCurrency` is not found, then the function returns `pool` with address zero.
 
 ##### Recommendation
 We recommend to add a check if a pool was found.
@@ -237,7 +237,7 @@ We recommend to add a check if a pool was found.
 
 #### 5. Possible price manipulation
 ##### Description
-At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L208, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L226, the contract uses the instant price of a pair on Sushiswap to get the amount of liquidity. The attacker can change that price to make it seem like the contract has more liquidity in an asset than it actually does.
+At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L208 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L226 the contract uses the instant price of a pair on Sushiswap to get the amount of liquidity. The attacker can change that price to make it seem like the contract has more liquidity in an asset than it actually does.
 
 ##### Recommendation
 We recommend to not use instant price oracles, but instead use TWAP and/or off-chain oracles.
@@ -247,7 +247,7 @@ We recommend to not use instant price oracles, but instead use TWAP and/or off-c
 
 #### 6. Possible miscalculation of `arithmeticMeanTick`
 ##### Description
-After calculating `arithmeticMeanTick` at the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L24, the value is not rounded down to negative infinity like it is done in Uniswap's implementation: https://github.com/Uniswap/v3-periphery/blob/22a7ead071fff53f00d9ddc13434f285f4ed5c7d/contracts/libraries/OracleLibrary.sol#L36. In some cases, this might result in a slightly wrong `arithmeticMeanTick` value.
+After calculating `arithmeticMeanTick` at the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L24 the value is not rounded down to negative infinity like it is done in Uniswap's implementation: https://github.com/Uniswap/v3-periphery/blob/22a7ead071fff53f00d9ddc13434f285f4ed5c7d/contracts/libraries/OracleLibrary.sol#L36. In some cases, this might result in a slightly wrong `arithmeticMeanTick` value.
 
 ##### Recommendation
 We suggest to use audited and well tested code.
@@ -258,9 +258,9 @@ We suggest to use audited and well tested code.
 #### 7. Possible loss of precision
 ##### Description
 There is a possible loss of precision when calculating `lookup()` functions due to division before multiplication at the lines:
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L76,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L80,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L271.
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L76
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L80
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L271
 
 For example, if `amount = 1`, then the return value would be `0`.
 
@@ -273,11 +273,11 @@ We suggest to multiply by `_rate` before division.
 #### 8. Reentry causing events misordering
 ##### Description
 Due to reentrancy, the events will be shown in an incorrect order at the lines:
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L172,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L278,
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L172
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L278
 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L285
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L302,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L318.
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L302
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L318
 
 This might lead to issues for third parties listening to events.
 
@@ -295,9 +295,9 @@ Files: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7a
 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol.
 
 Some of the functions and their logic are not fully clear from the code.
-For example: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L58,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L74,
-https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L79.
+For example: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L58
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L74
+https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L79
 
 ##### Recommendation
 Add comprehensive docstrings and change some function names to better describe their purpose.
@@ -307,14 +307,14 @@ Add comprehensive docstrings and change some function names to better describe t
 
 #### 2. Constant and interface names do not follow convention
 ##### Description
-Constant names do not follow Solidity naming conventions when they are declared at the following lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L24-L40, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L11. 
+Constant names do not follow Solidity naming conventions when they are declared at the following lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L24-L40 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Oracle.sol#L11
 
 The interface names should be in `CapWords`:
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/aave.sol#L5,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/cMarket.sol#L4,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/compound.sol#L4,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/controller.sol#L4,
-- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/vault.sol#L4.
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/aave.sol#L5
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/cMarket.sol#L4
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/compound.sol#L4
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/controller.sol#L4
+- https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/interfaces/vault.sol#L4
 
 ##### Recommendation
 The variable and contract names should follow the [Solidity Style Guide naming convention](https://docs.soliditylang.org/en/v0.8.13/style-guide.html#naming-conventions).
@@ -351,7 +351,7 @@ We recommend to add error messages.
 
 #### 5. Argument shadows a function 
 ##### Description
-At the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L152, argument `max` shadows a function named `max()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L183.
+At the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L152 argument `max` shadows a function named `max()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L183
 
 ##### Recommendation
 We recommend to remove the ambiguities. Always check for compiler warnings as they can flag the issue within a single contract.
@@ -361,7 +361,7 @@ We recommend to remove the ambiguities. Always check for compiler warnings as th
 
 #### 6. Gas optimization to find maximum
 ##### Description
-At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L252-L258, it is possible to optimize gas usage to find `_max`.
+At the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L252-L258 it is possible to optimize gas usage to find `_max`.
 
 ##### Recommendation
 We suggest to reduce the number of operations to optimize gas usage. For example, a better solution (but not necessarily the best):
@@ -381,7 +381,7 @@ if (a > _max) {
 
 #### 7. No checks for zero input arguments
 ##### Description
-For the functions `_mint()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L288 and `_burn()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L305, the input arguments `amount`, `minted`, `burned` can be zero. For example, user might want to deposit collateral without minting, mint without depositing additional collateral, burn without removing collateral, or withdraw collateral without burning.
+For the functions `_mint()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L288 and `_burn()` https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L305 the input arguments `amount`, `minted`, `burned` can be zero. For example, user might want to deposit collateral without minting, mint without depositing additional collateral, burn without removing collateral, or withdraw collateral without burning.
 
 Adding checks for these arguments can reduce gas usage by decreasing the number of changes to state variables and function calls.
 
@@ -393,7 +393,7 @@ We suggest to add these checks.
 
 #### 8. Unnecessary variable
 ##### Description
-The variable `_rate` is unnecessary at the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L75, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L270.
+The variable `_rate` is unnecessary at the lines https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L75 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L270
 
 ##### Recommendation
 Consider removing it and changing to 
@@ -406,7 +406,7 @@ return asset.getPrice(_currency) * (amount * _totalValue(asset) / _BPS);
 
 #### 9. `compound` interface unnecessary
 ##### Description
-The `compound` interface is only used at the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L188 to get all markets from the Iron Bank protocol https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L237. But `controller` interface also has the  `getAllMarkets()` function with the same signature.
+The `compound` interface is only used at the line https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L188 to get all markets from the Iron Bank protocol https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L237 But `controller` interface also has the  `getAllMarkets()` function with the same signature.
 
 ##### Recommendation
 Consider replacing `compound` with `controller` interface.
@@ -416,7 +416,7 @@ Consider replacing `compound` with `controller` interface.
 
 #### 10. The visibility is not set
 ##### Description
-The visibility is not set for variables `_totalValueCache` and `_liquidityCache`: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L49, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L52.
+The visibility is not set for variables `_totalValueCache` and `_liquidityCache`: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L49 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L52
 
 ##### Recommendation
 We recommend to set the visibility.
@@ -426,7 +426,7 @@ We recommend to set the visibility.
 
 #### 11. No events for changes in cached storage variables
 ##### Description
-At the lines: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L323-L326, https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L335-L338. 
+At the lines: https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L323-L326 https://github.com/ViacheslavKhovrov/project/blob/2334407900952c69c8fed7ac4c910820637a6f0c/contracts/Waifu.sol#L335-L338
 There are no events when storage variables `totalValues` and `liquidities` are changed. The users cannot know when these values change.
 
 ##### Recommendation
